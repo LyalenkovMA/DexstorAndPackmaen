@@ -9,13 +9,13 @@ namespace DexstorAndPackmaen
 {
     public struct Edge
     {
-        private Graf _one;
-        private Graf _two;
+        public Graf One;
+        public Graf Two;
         
         public Edge(Graf one, Graf two)
         {
-            _one = one;
-            _two = two;
+            One = one;
+            Two = two;
             PosirionOne = new Vecktor(one.X,one.Y);
             PositionTwo = new Vecktor(two.X,two.Y);
 
@@ -27,7 +27,7 @@ namespace DexstorAndPackmaen
 
         public int Weight { get;private set; }
 
-        public Vecktor PosirionOne { get; private set; }
+        public Vecktor PosirionOne { get; internal set; }
 
         public Vecktor PositionTwo { get; private set; }
     }

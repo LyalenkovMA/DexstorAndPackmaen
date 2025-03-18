@@ -9,7 +9,6 @@ namespace DexstorAndPackmaen
     public class ManagementGrafs
     {
         private List<Graf> _grafs;
-        private List<Edge> _edges;
 
         private Scena _scena;
         private char[,] _map;
@@ -21,29 +20,53 @@ namespace DexstorAndPackmaen
             _map = scena.GetMap();
         }
 
-        public Vecktor GetRotateGraf(GameObject gameObject, Vecktor finish, List<Vecktor> completedGrafs)
+        public Queue<Vecktor> GetRoute(Player player, Graf Start)
         {
-            Vecktor finishGraf = finish;
-            Vecktor start = new Vecktor(gameObject.X, gameObject.Y);
+            Queue<Vecktor> route = new Queue<Vecktor>();
+            List<Graf> failedGraphs = new List<Graf>();
+            AddGrafs(failedGraphs);
 
-            if(completedGrafs.Contains(start) == false)
-                completedGrafs.Add(start);
+            List<Edge> edges = new List<Edge>();
+            failedGraphs.Remove(Start);
 
-            Edge oneEdge = new Edge();
-
-            for (int i = 0; i < _edges.Count; i++)
+            while (new Vecktor(Start.X,Start.Y) != new Vecktor(player.X, player.Y))
             {
-                if((gameObject.X == _edges[i].PosirionOne.X && gameObject.Y == _edges[i].PosirionOne.Y)||
-                   (gameObject.X == _edges[i].PositionTwo.X && gameObject.Y == _edges[i].PositionTwo.Y))
+                if (Start.Left.Weight != 0)
+                    edges.Add(Start.Left);
+                if (Start.Rigth.Weight != 0)
+                    edges.Add(Start.Rigth);
+                if (Start.Upper.Weight != 0)
+                    edges.Add(Start.Upper);
+                if (Start.Lower.Weight != 0)
+                    edges.Add(Start.Lower);
+
+                Edge minWeight = edges[0];
+
+                for (int i = 0; i < edges.Count; i++)
                 {
-                    oneEdge = _edges[i];
-                    break;
+                    if (minWeight.Weight > edges[i].Weight)
+                        minWeight = edges[i];
+                }
+
+                if(failedGraphs.Contains(minWeight.One) ==false)
+                {
+                    route.Append(minWeight.PositionTwo);
+                    Start = minWeight.Two;
+                }
+                else
+                {
+                    route.Append(minWeight.PosirionOne);
+                    Start = minWeight.One;
                 }
             }
 
-            //Edge minEdge = oneEdge.GetMinSizeEdge();          
+            return route;
+        }
 
-            return finishGraf;
+        private void AddGrafs(List<Graf> failedGraphs)
+        {
+            for (int i = 0; i < _grafs.Count; i++)
+                failedGraphs.Add(_grafs[i]);
         }
 
         private void PostGrafs(Scena scena)
@@ -59,60 +82,6 @@ namespace DexstorAndPackmaen
                         _grafs.Add(new Graf(new Vecktor(x,y)));
                 }
             }
-        }
-
-        private void PostEdges()
-        {
-            int countRotait = 4;
-            Graf grafTwo = null;
-
-            foreach(Graf grafOne in _grafs)
-            {
-                for(int i = 1; i < countRotait; i++)
-                {
-                    if (_scena.IsCollisionWithWall(new Vecktor(grafOne.X+1, grafOne.Y)) == false)
-                    {
-                        if (IsGraf(new Vecktor(grafOne.X, grafOne.Y), out grafTwo))
-                        {
-                            _edges.Add(new Edge(grafOne , grafTwo));
-                            grafOne.SetListEdges(_edges[_edges.Count - 1]);
-                            grafTwo.SetListEdges(_edges[_edges.Count - 1]);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void CreateRoute(int x, int y, Graf graf)
-        {
-            int grafX = graf.X;
-            int grafY = graf.Y;
-
-            if (_scena.IsCollisionWithWall(new Vecktor(graf.X + x, graf.Y + y)) == false)
-            {
-                if(x != 0)
-                {
-                    
-                }
-            }
-        }
-
-        private bool IsGraf(Vecktor grafVecktor, out Graf grafTwo)
-        {
-            bool isGraf = false;
-            grafTwo = null;
-
-            foreach (Graf graf in _grafs)
-            {
-                if(grafVecktor == new Vecktor(graf.X,graf.Y))
-                {
-                    isGraf = true;
-                    grafTwo = graf;
-                    break;
-                }
-            }
-
-            return isGraf;
         }
 
         private bool IsPostGraf(Vecktor point)
