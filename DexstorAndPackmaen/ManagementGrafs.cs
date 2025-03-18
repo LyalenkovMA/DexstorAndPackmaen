@@ -63,6 +63,55 @@ namespace DexstorAndPackmaen
             return route;
         }
 
+        private void SetEages()
+        {
+            Graf grafOne;
+            Graf grafTwo = null;
+            for (int i = 0; i < _grafs.Count; i++)
+            {
+                grafOne = _grafs[i];
+                grafOne = AddEdge(grafOne, grafTwo, 0, -1);
+                grafOne = AddEdge(grafOne, grafTwo, 0, 1);
+                grafOne = AddEdge(grafOne, grafTwo, -1,0);
+                grafOne = AddEdge(grafOne, grafTwo, 1,0);
+            }
+        }
+
+        private Graf AddEdge(Graf grafOne, Graf grafTwo, int stepX,int StepY)
+        {
+                Vecktor vecktor = new Vecktor(grafOne.X, grafOne.Y - 1);
+
+                if (_scena.IsCollisionWithWall(vecktor) == false)
+                {
+                    if (IsGraf(vecktor, grafTwo) && _scena.IsCollisionWithWall(vecktor) == false)
+                    {
+                        grafOne.SetEdges(grafTwo);
+                    }
+                    else
+                    {
+                        vecktor += new Vecktor(stepX, StepY);
+                    }
+                }
+            return grafOne;
+        }
+
+        private bool IsGraf(Vecktor vecktor, Graf point)
+        {
+            bool isGraf = false;
+
+            for(int i=0; i < _grafs.Count; i++)
+            {
+                if(vecktor == new Vecktor(_grafs[i].X, _grafs[i].Y))
+                {
+                    point = _grafs[i];
+                    isGraf = true;
+                    break;
+                }
+            }
+
+            return isGraf;         
+        }
+
         private void AddGrafs(List<Graf> failedGraphs)
         {
             for (int i = 0; i < _grafs.Count; i++)
