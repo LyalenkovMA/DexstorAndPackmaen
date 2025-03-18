@@ -11,12 +11,14 @@ namespace DexstorAndPackmaen
         private int _keyPosition;
         private Player _player;
         private Graf _point;
+        private ManagementGrafs _managementGrafs;
         
-        public Ghost(int keyPosition,Player player, Scena scena) :
+        public Ghost(int keyPosition,Player player, Scena scena, ManagementGrafs managementGrafs) :
             base(scena.GetPositionStartGhost(),'S',scena)
         {
             _keyPosition = keyPosition;
             _player = player;
+            _managementGrafs = managementGrafs;
 
             if (keyPosition <= 4)
                 _point = GetPivot(player, keyPosition);
@@ -28,6 +30,7 @@ namespace DexstorAndPackmaen
         {
             if (X == _point.X && Y == _point.Y)
                 _point = new Graf(new Vecktor(_player.X,_player.Y));
+
         }
 
         private Graf GetPivot(Player player, int key) 
@@ -42,7 +45,7 @@ namespace DexstorAndPackmaen
             switch (key)
             {
                 case KeyOne:
-                    pivot = new Graf(new Vecktor(player.X, player.Y - 1));
+                    pivot = new Graf(new Vecktor(player.X, player.Y + 1));
                     break;
                 case KeyTwo:
                     pivot = new Graf(new Vecktor(player.X, player.Y - 1));
