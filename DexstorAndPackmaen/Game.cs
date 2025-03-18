@@ -18,8 +18,12 @@ namespace DexstorAndPackmaen
         {
             _scena = new Scena("map.txt");
             _player = new Player(new Vecktor(1, 1), '@', _scena);
+
             _countBal = 0;
+            CountKadr = 0;
         }
+
+        public int CountKadr { get; private set; }
 
         public void Start()
         {
@@ -42,11 +46,13 @@ namespace DexstorAndPackmaen
                 if(_scena.IsIAteIt(_player))
                     _countBal++;
 
+                CountKadr++;
                 Console.Clear();
 
                 _scena.Draw();
 
                 Console.WriteLine($"Количество очков {_countBal}");
+                Console.WriteLine($"Количество кудров {CountKadr}");
 
                 _player.Draw();
 

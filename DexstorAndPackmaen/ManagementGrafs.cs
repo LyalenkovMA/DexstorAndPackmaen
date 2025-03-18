@@ -65,15 +65,19 @@ namespace DexstorAndPackmaen
 
         private void SetEages()
         {
+            int stepForward = 1;
+            int stepBack = -1;
+            int stepStop = 0;
+
             Graf grafOne;
             Graf grafTwo = null;
             for (int i = 0; i < _grafs.Count; i++)
             {
                 grafOne = _grafs[i];
-                grafOne = AddEdge(grafOne, grafTwo, 0, -1);
-                grafOne = AddEdge(grafOne, grafTwo, 0, 1);
-                grafOne = AddEdge(grafOne, grafTwo, -1,0);
-                grafOne = AddEdge(grafOne, grafTwo, 1,0);
+                grafOne = AddEdge(grafOne, grafTwo, stepStop, stepBack);
+                grafOne = AddEdge(grafOne, grafTwo, stepStop, stepForward);
+                grafOne = AddEdge(grafOne, grafTwo, stepBack,stepStop);
+                grafOne = AddEdge(grafOne, grafTwo, stepForward ,stepStop);
             }
         }
 

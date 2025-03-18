@@ -10,10 +10,12 @@ namespace DexstorAndPackmaen
     {
         protected Scena GameScena;
         private Vecktor _position;
+        private Vecktor _oldPosition;
 
         public GameObject(Vecktor vecktor, char simpole, Scena scena) 
         {
             _position = vecktor;
+            _oldPosition = _position;
             SimboleObject = simpole;
             GameScena = scena;
             X = _position.X;
@@ -48,9 +50,9 @@ namespace DexstorAndPackmaen
             Y= _position.Y;
         }
 
-        protected void GetOldPosition(Vecktor oldPosition)
+        protected void GetOldPosition()
         {
-            _position = oldPosition;
+            _position = _oldPosition;
         }
     }
 }
