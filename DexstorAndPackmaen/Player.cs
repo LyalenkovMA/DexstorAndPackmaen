@@ -61,7 +61,7 @@ namespace DexstorAndPackmaen
                 if(X == ghost.X && Y == ghost.Y)
                 {
                     CountLive--;
-                    GetOldPosition(_startPosition);
+
                     return;
                 }
             }

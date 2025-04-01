@@ -35,19 +35,19 @@ namespace DexstorAndPackmaen
             if (graf.X < X)
                 Left = new Edge(graf, this);
             else
-                Left = new Edge();
+                Left = null;
             if (graf.X > X)
                 Rigth = new Edge(this, graf);
             else
-                Rigth = new Edge();
+                Rigth = null;
             if (graf.Y > Y)
                 Lower = new Edge(this, graf);
             else
-                Lower = new Edge();
+                Lower = null;
             if (graf.Y < Y)
                 Upper = new Edge(graf, this);
             else
-                Upper = new Edge();
+                Upper = null;
         }
     }
 }

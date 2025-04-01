@@ -11,6 +11,8 @@ namespace DexstorAndPackmaen
     {
         private Scena _scena;
         private Player _player;
+        private ManagementGrafs _managementGrafs;
+        Ghost _ghost;
 
         private int _countBal;
 
@@ -18,6 +20,8 @@ namespace DexstorAndPackmaen
         {
             _scena = new Scena("map.txt");
             _player = new Player(new Vecktor(1, 1), '@', _scena);
+            _managementGrafs = new ManagementGrafs(_scena);
+            _ghost = new Ghost(_player,_scena,_managementGrafs);
 
             _countBal = 0;
             CountKadr = 0;
@@ -42,6 +46,7 @@ namespace DexstorAndPackmaen
                 map = _scena.GetMap();
 
                 _player.Updete();
+                _ghost.Updete();
                 
                 if(_scena.IsIAteIt(_player))
                     _countBal++;
@@ -55,6 +60,7 @@ namespace DexstorAndPackmaen
                 Console.WriteLine($"Количество кудров {CountKadr}");
 
                 _player.Draw();
+                _ghost.Draw();
 
                 Thread.Sleep(500);
             }     

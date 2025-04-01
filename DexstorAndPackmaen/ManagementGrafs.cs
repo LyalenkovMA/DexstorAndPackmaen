@@ -12,145 +12,182 @@ namespace DexstorAndPackmaen
 
         private Scena _scena;
         private char[,] _map;
+        Vecktor _upMove;
+        Vecktor _downMove;
+        Vecktor _leftMove;
+        Vecktor _rigthMove;
 
         public ManagementGrafs(Scena scena)
         {
+            _upMove = new Vecktor(0, -1);
+            _downMove = new Vecktor(0, 1);
+            _leftMove = new Vecktor(-1, 0);
+            _rigthMove = new Vecktor(1, 0);
+
             _scena = scena;
-            PostGrafs(scena);
             _map = scena.GetMap();
+            _grafs = new List<Graf>();
+
+            PlaceGraphs();
+            PlaceEdge();
         }
 
-        public Queue<Vecktor> GetRoute(Player player, Graf Start)
+        public List<Vecktor> GetWay(Vecktor finishPosition, Vecktor startPosition)
         {
-            Queue<Vecktor> route = new Queue<Vecktor>();
+            List<Vecktor> way = new List<Vecktor>();
+            Edge minEdge = null;
             List<Graf> failedGraphs = new List<Graf>();
-            AddGrafs(failedGraphs);
+            Graf finish = new Graf(finishPosition);
+            Graf start = new Graf(startPosition);
+            Graf graf;
+            SetEdge(finish);
 
-            List<Edge> edges = new List<Edge>();
-            failedGraphs.Remove(Start);
+            foreach (Graf grafOne in _grafs)
+                if (grafOne.X == startPosition.X && grafOne.Y == startPosition.Y)
+                    start = grafOne;
 
-            while (new Vecktor(Start.X,Start.Y) != new Vecktor(player.X, player.Y))
+            foreach (Graf grafTwo in _grafs)
+                failedGraphs.Add(grafTwo);
+
+            failedGraphs.Add(finish);
+
+
+            while(start.X != finish.X && start.Y != finish.Y)
             {
-                if (Start.Left.Weight != 0)
-                    edges.Add(Start.Left);
-                if (Start.Rigth.Weight != 0)
-                    edges.Add(Start.Rigth);
-                if (Start.Upper.Weight != 0)
-                    edges.Add(Start.Upper);
-                if (Start.Lower.Weight != 0)
-                    edges.Add(Start.Lower);
+                if(failedGraphs.Contains(start))
+                    failedGraphs.Remove(start);
 
-                Edge minWeight = edges[0];
+                graf = start;
+                minEdge = GetMinEdge(graf);
+                start = minEdge.Two;
 
-                for (int i = 0; i < edges.Count; i++)
-                {
-                    if (minWeight.Weight > edges[i].Weight)
-                        minWeight = edges[i];
-                }
-
-                if(failedGraphs.Contains(minWeight.One) ==false)
-                {
-                    route.Append(minWeight.PositionTwo);
-                    Start = minWeight.Two;
-                }
-                else
-                {
-                    route.Append(minWeight.PosirionOne);
-                    Start = minWeight.One;
-                }
+                if(minEdge != null)
+                    way.Add(new Vecktor(start.X,start.Y));
             }
 
-            return route;
+            return way;
         }
 
-        private void SetEages()
+        private Edge GetMinEdge(Graf graf)
         {
-            int stepForward = 1;
-            int stepBack = -1;
-            int stepStop = 0;
+            Edge edge = null;
 
-            Graf grafOne;
-            Graf grafTwo = null;
-            for (int i = 0; i < _grafs.Count; i++)
+            edge = GetEdge(graf.Upper, edge);
+            edge = GetEdge(graf.Lower, edge);
+            edge = GetEdge(graf.Left, edge);
+            edge = GetEdge(graf.Rigth, edge);
+
+            return edge;
+        }
+
+        private static Edge GetEdge(Edge edgeGraf, Edge edge)
+        {
+            Edge edgeMin = edge;
+            if(edge != null)
+                if (edgeMin.Weight < edgeGraf.Weight)
+                    edgeMin = edgeGraf;
+            return edgeMin;
+        }
+
+        private void PlaceGraphs()
+        {
+            Vecktor vecktor;
+            for(int y= 0; y < _map.GetLength(0); y++)
             {
-                grafOne = _grafs[i];
-                grafOne = AddEdge(grafOne, grafTwo, stepStop, stepBack);
-                grafOne = AddEdge(grafOne, grafTwo, stepStop, stepForward);
-                grafOne = AddEdge(grafOne, grafTwo, stepBack,stepStop);
-                grafOne = AddEdge(grafOne, grafTwo, stepForward ,stepStop);
+                for(int x = 0; x < _map.GetLength(1); x++)
+                {
+                    vecktor = new Vecktor(y, x);
+
+                    if (_scena.IsCollisionWithWall(vecktor) == false)
+                        AddGraf(vecktor);
+                }
             }
         }
 
-        private Graf AddEdge(Graf grafOne, Graf grafTwo, int stepX,int StepY)
+        private void PlaceEdge()
         {
-                Vecktor vecktor = new Vecktor(grafOne.X, grafOne.Y - 1);
-
-                if (_scena.IsCollisionWithWall(vecktor) == false)
-                {
-                    if (IsGraf(vecktor, grafTwo) && _scena.IsCollisionWithWall(vecktor) == false)
-                    {
-                        grafOne.SetEdges(grafTwo);
-                    }
-                    else
-                    {
-                        vecktor += new Vecktor(stepX, StepY);
-                    }
-                }
-            return grafOne;
+            foreach (Graf graf in _grafs)
+            {
+                SetEdge(graf);
+            }
         }
 
-        private bool IsGraf(Vecktor vecktor, Graf point)
+        private void SetEdge(Graf graf)
+        {
+            MoveEdge(graf, _upMove);
+            MoveEdge(graf, _downMove);
+            MoveEdge(graf, _leftMove);
+            MoveEdge(graf, _rigthMove);
+        }
+
+        private void MoveEdge(Graf graf, Vecktor move)
+        {
+            Graf grafTwo;
+            Vecktor vecktor = new Vecktor(graf.X,graf.Y);
+
+            while(IsGrag(vecktor,out grafTwo))
+                vecktor += move;
+            
+            if (grafTwo != null)
+                graf.SetEdges(grafTwo);
+        }
+
+        private bool IsGrag(Vecktor vecktor,out Graf graf)
         {
             bool isGraf = false;
+            graf = null;
 
-            for(int i=0; i < _grafs.Count; i++)
+            for(int i = 0; i < _grafs.Count; i++)
             {
-                if(vecktor == new Vecktor(_grafs[i].X, _grafs[i].Y))
+                if (vecktor.X == _grafs[i].X && vecktor.Y == _grafs[i].Y)
                 {
-                    point = _grafs[i];
                     isGraf = true;
+                    graf = _grafs[i];
                     break;
                 }
             }
 
-            return isGraf;         
+            return isGraf;
         }
 
-        private void AddGrafs(List<Graf> failedGraphs)
+        private void AddGraf(Vecktor position)
         {
-            for (int i = 0; i < _grafs.Count; i++)
-                failedGraphs.Add(_grafs[i]);
-        }
+            int numberPaths = 0;
+            Vecktor upMove = new Vecktor(0, -1);
+            Vecktor downMove = new Vecktor(0, 1);
+            Vecktor leftMove = new Vecktor(-1, 0);
+            Vecktor rigthMove = new Vecktor(1, 0);
 
-        private void PostGrafs(Scena scena)
-        {
-            int startX = 1;
-            int startY = 1;
-            
-            for(int y = startY; y < _map.GetLength(0); y++)
+            if (_scena.IsCollisionWithWall(position) == false)
             {
-                for(int x = startX; x < _map.GetLength(0); x++)
+                numberPaths = ToFeelWay(position, numberPaths, upMove);
+                numberPaths = ToFeelWay(position, numberPaths, downMove);
+                numberPaths = ToFeelWay(position, numberPaths, leftMove);
+                numberPaths = ToFeelWay(position, numberPaths, rigthMove);
+
+                if(numberPaths > 1)
                 {
-                    if(IsPostGraf(new Vecktor(x, y)))
-                        _grafs.Add(new Graf(new Vecktor(x,y)));
+                    if(numberPaths > 2)
+                    {
+                        if ((_scena.IsCollisionWithWall(position + upMove) && _scena.IsCollisionWithWall(position + leftMove)) ||
+                           (_scena.IsCollisionWithWall(position + upMove) && _scena.IsCollisionWithWall(position + rigthMove)) ||
+                           (_scena.IsCollisionWithWall(position + downMove) && _scena.IsCollisionWithWall(position + leftMove)) ||
+                           (_scena.IsCollisionWithWall(position + downMove) && _scena.IsCollisionWithWall(position + rigthMove)))
+                            _grafs.Add(new Graf(position));
+                    }
+                    else
+                    {
+                        _grafs.Add(new Graf(position));
+                    }
                 }
             }
         }
 
-        private bool IsPostGraf(Vecktor point)
+        private int ToFeelWay(Vecktor position, int numberPaths, Vecktor move)
         {
-            int step = 1;
-            int stop = 0;
-            bool isWall = false;
-
-            if (
-               (_scena.IsCollisionWithWall(point + new Vecktor(point.X - step,stop)) == isWall && 
-               _scena.IsCollisionWithWall(point + new Vecktor(stop, point.Y -step)) == isWall)|| 
-               (_scena.IsCollisionWithWall(point + new Vecktor(point.X + step, stop)) == isWall && 
-                _scena.IsCollisionWithWall(point + new Vecktor(stop, point.Y + step)) == isWall)
-              )
-                return true;
-            return false;
+            if (_scena.IsCollisionWithWall(position + move))
+                numberPaths++;
+            return numberPaths;
         }
     }
 }

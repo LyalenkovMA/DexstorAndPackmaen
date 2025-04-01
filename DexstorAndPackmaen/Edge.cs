@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DexstorAndPackmaen
 {
-    public struct Edge
+    public class Edge
     {
         public Graf One;
         public Graf Two;
